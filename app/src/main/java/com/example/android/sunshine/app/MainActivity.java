@@ -9,6 +9,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import java.util.Arrays;
 import java.util.List;
@@ -73,12 +74,16 @@ public class MainActivity extends ActionBarActivity {
             // Take the given forecast data for the week and populate the ListView accordingly.
             mForecastAdapter = new ArrayAdapter<>(
                     getActivity(),
-                    R.layout.fragment_main,
+                    R.layout.list_item_forecast,
                     R.id.list_item_forecast_textview,
                     forecastEntries
             );
 
+            // Assign the adapter to the list view to populate it with data.
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+            ListView forecastListView = (ListView) rootView.findViewById(R.id.listview_forecast);
+            forecastListView.setAdapter(mForecastAdapter);
+
             return rootView;
         }
     }
