@@ -1,18 +1,9 @@
 package com.example.android.sunshine.app;
 
-import android.support.v7.app.ActionBarActivity;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-
-import java.util.Arrays;
-import java.util.List;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -23,7 +14,7 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
+                    .add(R.id.container, new ForecastFragment())
                     .commit();
         }
     }
@@ -48,43 +39,5 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-        ArrayAdapter<String> mForecastAdapter;
-
-        public PlaceholderFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            List<String> forecastEntries = Arrays.asList(
-                    "Today \u2014 Sunny \u2014 88 / 63",
-                    "Tomorrow \u2014 Foggy \u2014 70 / 46",
-                    "Weds \u2014 Cloudy \u2014 72 / 63",
-                    "Thurs \u2014 Rainy \u2014 64 / 51",
-                    "Fri \u2014 Foggy \u2014 70 / 46",
-                    "Sat \u2014 Sunny \u2014 76 / 68"
-            );
-
-            // Take the given forecast data for the week and populate the ListView accordingly.
-            mForecastAdapter = new ArrayAdapter<>(
-                    getActivity(),
-                    R.layout.list_item_forecast,
-                    R.id.list_item_forecast_textview,
-                    forecastEntries
-            );
-
-            // Assign the adapter to the list view to populate it with data.
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            ListView forecastListView = (ListView) rootView.findViewById(R.id.listview_forecast);
-            forecastListView.setAdapter(mForecastAdapter);
-
-            return rootView;
-        }
     }
 }
