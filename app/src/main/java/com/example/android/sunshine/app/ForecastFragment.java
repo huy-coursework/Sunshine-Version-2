@@ -59,7 +59,7 @@ public class ForecastFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
-                        .putExtra(Intent.EXTRA_TEXT, mForecastAdapter.getItem(1));
+                        .putExtra(Intent.EXTRA_TEXT, mForecastAdapter.getItem(i));
                 startActivity(detailIntent);
             }
         });
