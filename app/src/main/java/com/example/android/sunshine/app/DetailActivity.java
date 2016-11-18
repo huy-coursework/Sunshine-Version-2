@@ -77,7 +77,8 @@ public class DetailActivity extends ActionBarActivity {
 
             View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
-            if (getActivity().getIntent() != null) {
+            Intent intent = getActivity().getIntent();
+            if (intent != null && intent.hasExtra(Intent.EXTRA_TEXT)) {
                 TextView textForecast = (TextView) rootView.findViewById(R.id.text_forecast);
                 textForecast.setText(getActivity().getIntent().getStringExtra(Intent.EXTRA_TEXT));
             }
