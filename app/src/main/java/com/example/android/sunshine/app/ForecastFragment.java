@@ -31,7 +31,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -65,22 +64,13 @@ public class ForecastFragment extends Fragment {
                 startActivity(detailIntent);
             }
         });
-
-        new FetchWeatherTask().execute("94043");
         return rootView;
     }
 
-    private void updateForecastListView(List<String> forecastEntries) {
-        // Take the given forecast data for the week and populate the ListView accordingly.
-        mForecastAdapter = new ArrayAdapter<>(
-                getActivity(),
-                R.layout.list_item_forecast,
-                R.id.list_item_forecast_textview,
-                forecastEntries
-        );
-
-        // Assign the adapter to the list view to populate it with data.
-        forecastListView.setAdapter(mForecastAdapter);
+    @Override
+    public void onStart() {
+        super.onStart();
+        updateWeather();
     }
 
     @Override
@@ -96,16 +86,20 @@ public class ForecastFragment extends Fragment {
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
             case R.id.action_refresh:
-                SharedPreferences sharedPref =
-                        PreferenceManager.getDefaultSharedPreferences(getActivity());
-                String locationPref = sharedPref.getString(
-                        getString(R.string.pref_location_key),
-                        getString(R.string.pref_location_default));
-                new FetchWeatherTask().execute(locationPref);
+                updateWeather();
                 return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void updateWeather() {
+        SharedPreferences sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String locationPref = sharedPref.getString(
+                getString(R.string.pref_location_key),
+                getString(R.string.pref_location_default));
+        new FetchWeatherTask().execute(locationPref);
     }
 
     public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
@@ -199,7 +193,16 @@ public class ForecastFragment extends Fragment {
         @Override
         protected void onPostExecute(String[] result) {
             if (result != null) {
-                updateForecastListView(Arrays.asList(result));
+                // Take the given forecast data for the week and populate the ListView accordingly.
+                mForecastAdapter = new ArrayAdapter<>(
+                        getActivity(),
+                        R.layout.list_item_forecast,
+                        R.id.list_item_forecast_textview,
+                        Arrays.asList(result)
+                );
+
+                // Assign the adapter to the list view to populate it with data.
+                forecastListView.setAdapter(mForecastAdapter);
             }
             super.onPostExecute(result);
         }
