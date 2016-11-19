@@ -36,6 +36,7 @@ import java.util.Arrays;
  * A placeholder fragment containing a simple view.
  */
 public class ForecastFragment extends Fragment {
+
     private ArrayAdapter<String> mForecastAdapter;
     private View rootView;
     private ListView forecastListView;
@@ -105,6 +106,9 @@ public class ForecastFragment extends Fragment {
     public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
 
         private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
+
+        private static final int PARAM_INDEX_LOCATION = 0;
+
         private static final String QUERY_PARAM_Q = "q";
         private static final String QUERY_PARAM_MODE = "mode";
         private static final String QUERY_PARAM_UNITS = "units";
@@ -132,7 +136,7 @@ public class ForecastFragment extends Fragment {
                         .scheme("http")
                         .authority("api.openweathermap.org")
                         .path("data/2.5/forecast/daily")
-                        .appendQueryParameter(QUERY_PARAM_Q, params[0])
+                        .appendQueryParameter(QUERY_PARAM_Q, params[PARAM_INDEX_LOCATION])
                         .appendQueryParameter(QUERY_PARAM_MODE, OUTPUT_FORMAT)
                         .appendQueryParameter(QUERY_PARAM_UNITS, UNITS)
                         .appendQueryParameter(QUERY_PARAM_CNT, NUMBER_OF_DAYS)
@@ -221,12 +225,21 @@ public class ForecastFragment extends Fragment {
         /**
          * Prepare the weather high/lows for presentation.
          */
-        private String formatHighLows(double high, double low) {
+        private String formatHighLows(double high, double low, String unitType) {
+
+            if (unitType.equals(getString(R.string.pref_units_value_imperial))) {
+                high = (high * 1.8) + 32;
+                low = (low * 1.8) + 32;
+            } else if (!unitType.equals(getString(R.string.pref_units_value_metric))) {
+                Log.d(LOG_TAG, "Unit type not found: " + unitType);
+            }
+
             // For presentation, assume the user doesn't care about tenths of a degree.
             long roundedHigh = Math.round(high);
             long roundedLow = Math.round(low);
 
-            return roundedHigh + "/" + roundedLow;
+            String highLowStr = roundedHigh + "/" + roundedLow;
+            return highLowStr;
         }
 
         /**
@@ -295,7 +308,11 @@ public class ForecastFragment extends Fragment {
                 double high = temperatureObject.getDouble(OWM_MAX);
                 double low = temperatureObject.getDouble(OWM_MIN);
 
-                highAndLow = formatHighLows(high, low);
+                String unitsPref = PreferenceManager.getDefaultSharedPreferences(getActivity())
+                        .getString(
+                                getString(R.string.pref_units_key),
+                                getString(R.string.pref_units_default));
+                highAndLow = formatHighLows(high, low, unitsPref);
                 resultStrs[i] = day + " - " + description + " - " + highAndLow;
             }
 
