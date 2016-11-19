@@ -19,9 +19,12 @@ package com.example.android.sunshine.app;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,7 +42,6 @@ public class DetailActivity extends ActionBarActivity {
                     .commit();
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -67,7 +69,13 @@ public class DetailActivity extends ActionBarActivity {
      */
     public static class PlaceholderFragment extends Fragment {
 
+        private static final String FORECAST_HASH_TAG = " #SunshineApp";
+
+        private ShareActionProvider mShareActionProvider;
+        private String forecast;
+
         public PlaceholderFragment() {
+            setHasOptionsMenu(true);
         }
 
         @Override
@@ -78,11 +86,31 @@ public class DetailActivity extends ActionBarActivity {
 
             Intent intent = getActivity().getIntent();
             if (intent != null && intent.hasExtra(Intent.EXTRA_TEXT)) {
+                forecast = getActivity().getIntent().getStringExtra(Intent.EXTRA_TEXT);
                 TextView textForecast = (TextView) rootView.findViewById(R.id.text_forecast);
-                textForecast.setText(getActivity().getIntent().getStringExtra(Intent.EXTRA_TEXT));
+                textForecast.setText(forecast);
             }
 
             return rootView;
+        }
+
+        @Override
+        public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+            // Inflate the menu; this adds items to the action bar if it is present.
+            menuInflater.inflate(R.menu.detailfragment, menu);
+
+            // Locate MenuItem with ShareActionProvider
+            MenuItem item = menu.findItem(R.id.action_share);
+
+            // Fetch and store ShareActionProvider
+            mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+            if (mShareActionProvider != null) {
+                Intent shareIntent = new Intent(Intent.ACTION_SEND)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
+                        .setType("text/plain")
+                        .putExtra(Intent.EXTRA_TEXT, forecast + FORECAST_HASH_TAG);
+                mShareActionProvider.setShareIntent(shareIntent);
+            }
         }
     }
 }
