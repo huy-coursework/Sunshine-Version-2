@@ -216,8 +216,7 @@ public class ForecastFragment extends Fragment {
             long roundedHigh = Math.round(high);
             long roundedLow = Math.round(low);
 
-            String highLowStr = roundedHigh + "/" + roundedLow;
-            return highLowStr;
+            return roundedHigh + "/" + roundedLow;
         }
 
         /**
@@ -291,7 +290,6 @@ public class ForecastFragment extends Fragment {
             }
 
             return resultStrs;
-
         }
     }
 

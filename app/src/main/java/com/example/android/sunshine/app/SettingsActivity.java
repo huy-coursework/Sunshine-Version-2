@@ -1,5 +1,7 @@
 package com.example.android.sunshine.app;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -16,6 +18,11 @@ import android.preference.PreferenceManager;
  */
 public class SettingsActivity extends PreferenceActivity
         implements Preference.OnPreferenceChangeListener {
+
+    public static void startSettingsActivity(Context context) {
+        Intent settingsIntent = new Intent(context, SettingsActivity.class);
+        context.startActivity(settingsIntent);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
