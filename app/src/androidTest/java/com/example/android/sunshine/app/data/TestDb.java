@@ -15,6 +15,7 @@
  */
 package com.example.android.sunshine.app.data;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
@@ -112,22 +113,58 @@ public class TestDb extends AndroidTestCase {
     */
     public void testLocationTable() {
         // First step: Get reference to writable database
+        SQLiteDatabase database = new WeatherDbHelper(mContext).getWritableDatabase();
 
         // Create ContentValues of what you want to insert
         // (you can use the createNorthPoleLocationValues if you wish)
+        String testLocationSetting = "99705";
+        String testCityName = "North Pole";
+        double testLatitude = 64.7488;
+        double testLongitude = -147.353;
+        ContentValues locationContentValues = new ContentValues();
+        locationContentValues.put(
+                WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING,
+                testLocationSetting);
+        locationContentValues.put(WeatherContract.LocationEntry.COLUMN_CITY_NAME, testCityName);
+        locationContentValues.put(WeatherContract.LocationEntry.COLUMN_COORD_LAT, testLatitude);
+        locationContentValues.put(WeatherContract.LocationEntry.COLUMN_COORD_LONG, testLongitude);
 
         // Insert ContentValues into database and get a row ID back
+        long rowId = database.insert(
+                WeatherContract.LocationEntry.TABLE_NAME,
+                null,
+                locationContentValues);
+        assertTrue(
+                String.format(
+                        "Failed to insert content values into database: %s",
+                        locationContentValues),
+                rowId != -1);
 
         // Query the database and receive a Cursor back
+        Cursor cursor = database.query(
+                WeatherContract.LocationEntry.TABLE_NAME,
+                null,
+                WeatherContract.LocationEntry._ID + " = ?",
+                new String[]{"" + rowId},
+                null,
+                null,
+                null);
 
         // Move the cursor to a valid database row
+        boolean hasItemsInCursor = cursor.moveToFirst();
+        assertTrue("No items in returned cursor", hasItemsInCursor);
 
         // Validate data in resulting Cursor with the original ContentValues
         // (you can use the validateCurrentRecord function in TestUtilities to validate the
         // query if you like)
+        TestUtilities.validateCurrentRecord(
+                "Resulting cursor had different content values than expected",
+                cursor,
+                locationContentValues);
 
         // Finally, close the cursor and database
-
+        cursor.close();
+        database.close();
     }
 
     /*
