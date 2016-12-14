@@ -195,8 +195,8 @@ public class WeatherProvider extends ContentProvider {
             }
             // "weather"
             case WEATHER: {
-                retCursor = sWeatherByLocationSettingQueryBuilder.query(
-                        mOpenHelper.getReadableDatabase(),
+                retCursor = mOpenHelper.getReadableDatabase().query(
+                        WeatherContract.WeatherEntry.TABLE_NAME,
                         projection,
                         null,
                         null,
@@ -207,10 +207,8 @@ public class WeatherProvider extends ContentProvider {
             }
             // "location"
             case LOCATION: {
-                SQLiteQueryBuilder locationQueryBuilder = new SQLiteQueryBuilder();
-                locationQueryBuilder.setTables(WeatherContract.LocationEntry.TABLE_NAME);
-                retCursor = locationQueryBuilder.query(
-                        mOpenHelper.getReadableDatabase(),
+                retCursor = mOpenHelper.getReadableDatabase().query(
+                        WeatherContract.LocationEntry.TABLE_NAME,
                         projection,
                         null,
                         null,
