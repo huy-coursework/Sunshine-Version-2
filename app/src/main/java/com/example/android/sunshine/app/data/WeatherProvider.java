@@ -270,6 +270,10 @@ public class WeatherProvider extends ContentProvider {
 
         // Student: Use the uriMatcher to match the WEATHER and LOCATION URI's we are going to
         // handle.  If it doesn't match these, throw an UnsupportedOperationException.
+        if (selection == null)
+        {
+            selection = "1";
+        }
         String tableName;
         switch (sUriMatcher.match(uri)) {
             case WEATHER:
