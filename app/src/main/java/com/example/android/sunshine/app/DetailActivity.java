@@ -116,9 +116,9 @@ public class DetailActivity extends ActionBarActivity {
 
             Intent intent = getActivity().getIntent();
             if (intent != null) {
-                forecast = intent.getDataString();
-                uri = Uri.parse(forecast);
-                textForecast.setText(forecast);
+                String forecastUri = intent.getDataString();
+                uri = Uri.parse(forecastUri);
+                textForecast.setText(forecastUri);
             }
 
             return rootView;
@@ -134,13 +134,13 @@ public class DetailActivity extends ActionBarActivity {
 
             // Fetch and store ShareActionProvider
             mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
-            if (mShareActionProvider != null) {
-                Intent shareIntent = new Intent(Intent.ACTION_SEND)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
-                        .setType("text/plain")
-                        .putExtra(Intent.EXTRA_TEXT, forecast + FORECAST_HASH_TAG);
-                mShareActionProvider.setShareIntent(shareIntent);
-            }
+        }
+
+        private Intent createShareForecastIntent() {
+            return new Intent(Intent.ACTION_SEND)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
+                                .setType("text/plain")
+                                .putExtra(Intent.EXTRA_TEXT, forecast + FORECAST_HASH_TAG);
         }
 
         @Override
@@ -163,8 +163,8 @@ public class DetailActivity extends ActionBarActivity {
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            data.moveToFirst();
             if (textForecast != null) {
-                data.moveToFirst();
                 String strDate = Utility.formatDate(data.getLong(COL_WEATHER_DATE));
                 String strDescription = data.getString(COL_WEATHER_DESC);
                 String strMaxTemp = Utility.formatTemperature(
@@ -181,6 +181,11 @@ public class DetailActivity extends ActionBarActivity {
                         strMaxTemp,
                         strMinTemp);
                 textForecast.setText(displayText);
+                forecast = displayText;
+
+                if (mShareActionProvider != null) {
+                    mShareActionProvider.setShareIntent(createShareForecastIntent());
+                }
             }
         }
 
