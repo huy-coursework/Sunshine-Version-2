@@ -17,8 +17,13 @@
 package com.example.android.sunshine.app;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.ShareActionProvider;
@@ -30,7 +35,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.android.sunshine.app.data.WeatherContract;
+
 public class DetailActivity extends ActionBarActivity {
+
+    public static final int FORECAST_LOADER_ID = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +47,7 @@ public class DetailActivity extends ActionBarActivity {
         setContentView(R.layout.activity_detail);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
+                    .add(R.id.container, new DetailFragment())
                     .commit();
         }
     }
@@ -67,14 +76,34 @@ public class DetailActivity extends ActionBarActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class DetailFragment extends Fragment
+            implements LoaderManager.LoaderCallbacks<Cursor> {
 
         private static final String FORECAST_HASH_TAG = " #SunshineApp";
 
+        private TextView textForecast;
         private ShareActionProvider mShareActionProvider;
         private String forecast;
+        private Uri uri;
 
-        public PlaceholderFragment() {
+        private static final String[] FORECAST_COLUMNS = {
+                // In this case the id needs to be fully qualified with a table name, since
+                // the content provider joins the location & weather tables in the background
+                // (both have an _id column)
+                // On the one hand, that's annoying.  On the other, you can search the weather table
+                // using the location set by the user, which is only in the Location table.
+                // So the convenience is worth it.
+                WeatherContract.WeatherEntry.COLUMN_DATE,
+                WeatherContract.WeatherEntry.COLUMN_SHORT_DESC,
+                WeatherContract.WeatherEntry.COLUMN_MAX_TEMP,
+                WeatherContract.WeatherEntry.COLUMN_MIN_TEMP
+        };
+        static final int COL_WEATHER_DATE = 0;
+        static final int COL_WEATHER_DESC = 1;
+        static final int COL_WEATHER_MAX_TEMP = 2;
+        static final int COL_WEATHER_MIN_TEMP = 3;
+
+        public DetailFragment() {
             setHasOptionsMenu(true);
         }
 
@@ -83,11 +112,12 @@ public class DetailActivity extends ActionBarActivity {
                                  Bundle savedInstanceState) {
 
             View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
-            TextView textForecast = (TextView) rootView.findViewById(R.id.text_forecast);
+            textForecast = (TextView) rootView.findViewById(R.id.text_forecast);
 
             Intent intent = getActivity().getIntent();
             if (intent != null) {
                 forecast = intent.getDataString();
+                uri = Uri.parse(forecast);
                 textForecast.setText(forecast);
             }
 
@@ -111,6 +141,52 @@ public class DetailActivity extends ActionBarActivity {
                         .putExtra(Intent.EXTRA_TEXT, forecast + FORECAST_HASH_TAG);
                 mShareActionProvider.setShareIntent(shareIntent);
             }
+        }
+
+        @Override
+        public void onActivityCreated(Bundle savedInstanceState) {
+            getLoaderManager().initLoader(FORECAST_LOADER_ID, null, this);
+            super.onActivityCreated(savedInstanceState);
+        }
+
+        @Override
+        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+            String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";
+            return new CursorLoader(
+                    getActivity(),
+                    uri,
+                    FORECAST_COLUMNS,
+                    null,
+                    null,
+                    sortOrder);
+        }
+
+        @Override
+        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            if (textForecast != null) {
+                data.moveToFirst();
+                String strDate = Utility.formatDate(data.getLong(COL_WEATHER_DATE));
+                String strDescription = data.getString(COL_WEATHER_DESC);
+                String strMaxTemp = Utility.formatTemperature(
+                        data.getDouble(COL_WEATHER_MAX_TEMP),
+                        Utility.isMetric(getActivity()));
+                String strMinTemp = Utility.formatTemperature(
+                        data.getDouble(COL_WEATHER_MIN_TEMP),
+                        Utility.isMetric(getActivity()));
+
+                String displayText = String.format(
+                        "%s - %s - %s/%s",
+                        strDate,
+                        strDescription,
+                        strMaxTemp,
+                        strMinTemp);
+                textForecast.setText(displayText);
+            }
+        }
+
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+
         }
     }
 }
